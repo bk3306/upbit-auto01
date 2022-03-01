@@ -11,11 +11,11 @@ def get_target_price(ticker, k):
     target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
 
-def get_close_price(ticker):
-    """전날 종가 구해서 밑으로 내려가면 손절"""
+def get_low_price(ticker):
+    """전날 저가 구해서 밑으로 내려가면 손절"""
     df = pyupbit.get_ohlcv(ticker, interval="minute60", count=2)
-    close_price = df.iloc[0]['close']
-    return close_price
+    low_price = df.iloc[0]['low']
+    return low_price
 
 def get_start_time(ticker):
     """시작 시간 조회"""
@@ -54,7 +54,7 @@ while True:
         now = datetime.datetime.now()
         start_time = get_start_time("KRW-BTC") #3:00
         end_time = start_time + datetime.timedelta(hours=1) #3:00 + 1h
-        close_price = get_close_price("KRW-BTC")
+        low_price = get_low_price("KRW-BTC")
         # 3:00 < now < 3:59:50
         if start_time < now < end_time - datetime.timedelta(seconds=10):
             target_price = get_target_price("KRW-BTC", 0.2)
@@ -64,7 +64,7 @@ while True:
                 krw = get_balance("KRW")
                 if krw > 5000:
                     upbit.buy_market_order("KRW-BTC", krw*0.9995)
-            if current_price < close_price:
+            if current_price < low_price:
                 btc = get_balance("BTC")
                 if btc > 0.00008:
                     upbit.sell_market_order("KRW-BTC", btc*0.9995)
